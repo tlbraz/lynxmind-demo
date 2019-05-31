@@ -1,0 +1,181 @@
+openapi: 3.0.0
+info:
+  description: example
+  version: 1.0.0
+  title: title
+  contact: {}
+paths:
+  /example:
+    post:
+      responses:
+        '200':
+          description: OK
+
+      requestBody:
+        content: {}
+components:
+  #  ----- Data models  ----------------------------------------
+  schemas:
+    Exception:
+      type: object
+    Rfc7807Exception:
+      description: The Rfc7807 specification for exceptions.
+      allOf:
+        - $ref: '#/components/schemas/Exception'
+        - type: object
+          properties:
+            type:
+              type: string
+              description: A URI reference that identifies the problem type.  This specification encourages that, when dereferenced, it provide human-readable documentation for the problem type.
+            title:
+              type: string
+              description: A short, human-readable summary of the problem type.
+            status:
+              type: integer
+              description: The HTTP status code.
+            detail:
+              type: string
+              description: A human-readable explanation specific to this occurrence of the problem.
+            instance:
+              type: string
+              description: A URI reference that identifies the specific occurrence of the problem.
+          required:
+            - type
+            - title
+            - status
+            - detail
+    AbsisExceptionType:
+      type: string
+      enum: [VALIDATION, BUSINESS, RUNTIME, CHALLENGE, NOTFOUND, UNAUTHORIZED, AUTHENTICATION]
+      description: The possible types of an AbsisException.
+    AbsisFieldError:
+      type: object
+      description: The representation of a validation error.
+      properties:
+        code:
+          type: string
+          description: The error code.
+        parameters:
+          type: array
+          items:
+            type: object
+          description: List of parameters to replace in the message.
+        value:
+          type: object
+          description: The value that caused the error.
+      example:
+        code: request
+        parameters:
+          - codes:
+              - aCode
+              - otherCode
+        value: NotNull
+    AbsisException:
+      description: Representation of an exception.
+      allOf:
+        - $ref: '#/components/schemas/Rfc7807Exception'
+        - type: object
+          properties:
+            _class:
+              type: string
+              description: The canonical name of the class AbsisException.
+            cause:
+              $ref: '#/components/schemas/AbsisException'
+              description: The AbsisException wrapping the exception that originated this exception.
+            code:
+              type: string
+              description: The error code.
+            translated:
+              type: boolean
+              description: Whether if the exception has been translated or not.
+            parameters:
+              type: array
+              items:
+                type: object
+              description: List of parameters to replace in the detail message.
+            errors:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/AbsisFieldError'
+              description: List of validation errors.
+          example:
+            _class: com.caixabank.absis.arch.common.exception.AbsisException
+            cause:
+              _class: com.caixabank.absis.arch.common.exception.AbsisException
+              cause: null
+              type: /runtime
+              title: RUNTIME
+              status: 500
+              detail: Filter threw Exception
+              code: com.netflix.zuul.exception.ZuulException
+              translated: false
+            type: /runtime
+            title: RUNTIME
+            status: 500
+            detail: Caught in Zuul
+            code: 0000
+            translated: false
+  responses:
+    '400':
+      description: Error when validating input parameters or request body.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AbsisException'
+          example:
+            _class: com.caixabank.absis.arch.common.exception.AbsisException
+            type: "/validation"
+            title: VALIDATION
+            status: 400
+            detail: Generic validation error
+            code: CODE_GENERIC_VALIDATION_ERROR
+            translated: false
+            errors:
+              request:
+                code: NotNull
+                parameters:
+                  - codes:
+                      - serviceManagerRequest.request
+                      - request
+                    defaultMessage: request
+                    code: request
+    '401':
+      description: User authentication error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AbsisException'
+    '403':
+      description: The user has not enough privileges to perform the requested operation so the request has been rejected.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AbsisException'
+    '404':
+      description: The endpoint does not exists or the attempted resource does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AbsisException'
+    '409':
+      description: Semantic validation error triggered when validating the request data or while running the use case.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AbsisException'
+    '428':
+      description: The data has been validated but the operation could not been performed because a third-party approval is required.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AbsisException'
+    '500':
+      description: Unexpected error occurred at one of the layers of the microservice, controller, business service, repository etc.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AbsisException'
+# Added by API Auto Mocking Plugin
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/bakas/demo/1.0.0
