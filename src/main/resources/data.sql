@@ -1,3 +1,3 @@
-insert into Consultant values (1, 'Joao', 'Kek');
-insert into Consultant values (2, 'Alemida', 'Kik');
-insert into Consultant values (3, 'Top', 'Kuk');
+INSERT INTO CLIENT (ID, FIRST_NAME, LAST_NAME, EMAIL) VALUES (1, 'joao', 'kek', 'mail1@mail.com');
+INSERT INTO CLIENT (ID, FIRST_NAME, LAST_NAME, EMAIL) VALUES (2, 'alemida', 'kik', 'mail2@mail.com');
+INSERT INTO CLIENT (ID, FIRST_NAME, LAST_NAME, EMAIL) VALUES (3, 'top', 'kuk', 'mail3@mail.com');
